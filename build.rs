@@ -4,13 +4,22 @@ extern crate cmake;
 use std::{env, path::PathBuf};
 
 fn main() {
+    // Get the target dir.
+    let target_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+
     // Define the cmake configuration.
     let config = cmake::Config::new("ale")
-        // Set CXX version.
+        // Set VCPKG_ROOT env variable.
+        .env(
+            "VCPKG_ROOT",
+            format!("{}/target/vcpkg", target_path.display()),
+        )
         // Set the build release type.
         .define("CMAKE_BUILD_TYPE", "Release")
         // Disable Python lib.
         .define("BUILD_PYTHON_LIB", "OFF")
+        // Enable SDL support.
+        .define("SDL_SUPPORT", "ON")
         // Build the library.
         .build();
 

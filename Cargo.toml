@@ -17,3 +17,8 @@ categories = ["api-bindings", "science", "simulation"]
 [build-dependencies]
 bindgen = "^0.59"
 cmake = "^0.1"
+
+[package.metadata.vcpkg]
+git = "https://github.com/microsoft/vcpkg"
+rev = "2022.05.10"
+dependencies = ["sdl2"]
