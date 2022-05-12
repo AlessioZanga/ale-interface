@@ -1,8 +1,19 @@
 [package]
 name = "ale-interface"
-version = "0.0.0"
+version = "0.0.1"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Alessio Zanga <alessio.zanga@outlook.it>"]
+description = "Rust FFI bindings for the Arcade-Learning-Environment."
+readme = "README.md"
+license = "Apache-2.0 OR MIT"
+homepage = "https://github.com/AlessioZanga/ale-interface"
+repository = "https://github.com/AlessioZanga/ale-interface"
+documentation = "https://docs.rs/ale-interface"
+keywords = ["reinforcement-learning"]
+categories = ["api-bindings", "science", "simulation"]
 
 [dependencies]
+
+[build-dependencies]
+bindgen = "^0.59"
+cmake = "^0.1"
