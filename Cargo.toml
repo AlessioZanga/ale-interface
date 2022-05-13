@@ -24,6 +24,6 @@ git = "https://github.com/microsoft/vcpkg"
 rev = "2022.05.10"
 
 [package.metadata.vcpkg.target]
-x86_64-unknown-linux-gnu = { triplet = "x64-linux", dev-dependencies = ["sdl2", "sdl2[x11]", "zlib"] }
-x86_64-apple-darwin = { triplet = "x64-osx", dev-dependencies = ["sdl2", "zlib"] }
-x86_64-pc-windows-msvc = { triplet = "x64-windows", dev-dependencies = ["sdl2", "zlib"] }
+x86_64-unknown-linux-gnu = { triplet = "x64-linux", dependencies = ["sdl2", "sdl2[x11]", "zlib"] }
+x86_64-apple-darwin = { triplet = "x64-osx", dependencies = ["sdl2", "zlib"] }
+x86_64-pc-windows-msvc = { triplet = "x64-windows", dependencies = ["sdl2", "zlib"] }

@@ -34,6 +34,7 @@ pub struct ALEInterface {
 }
 
 impl ALEInterface {
+    /// Constructs an ALEInterface struct.
     pub fn new() -> Self {
         // Initialize the ALEInterface FFI.
         let ffi = unsafe { root::ale::ALEInterface::new() };
@@ -41,6 +42,7 @@ impl ALEInterface {
         Self { ffi }
     }
 
+    /// Constructs an ALEInterface struct with or without a display screen.
     pub fn with_display_screen(flag: bool) -> Self {
         // Initialize the ALEInterface FFI.
         let ffi = unsafe { root::ale::ALEInterface::new1(flag) };
@@ -48,21 +50,25 @@ impl ALEInterface {
         Self { ffi }
     }
 
+    /// Gets boolean attribute given key.
     // FIXME: Make self reference immutable.
     pub fn get_bool(&mut self, key: &str) -> bool {
         unsafe { self.ffi.getBool(&into_std_string(key)) }
     }
 
+    /// Gets integer attribute given key.
     // FIXME: Make self reference immutable.
     pub fn get_int(&mut self, key: &str) -> i32 {
         unsafe { self.ffi.getInt(&into_std_string(key)) }
     }
 
+    /// Gets float attribute given key.
     // FIXME: Make self reference immutable.
     pub fn get_float(&mut self, key: &str) -> f32 {
         unsafe { self.ffi.getFloat(&into_std_string(key)) }
     }
 
+    /// Gets string attribute given key.
     // FIXME: Make self reference immutable.
     pub fn get_str(&mut self, key: &str) -> &str {
         unsafe { from_std_string(self.ffi.getString(&into_std_string(key))) }

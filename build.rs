@@ -9,15 +9,21 @@ use std::{
 use vcpkg;
 
 fn main() {
-    // Get the target dir.
-    let target_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    // Get the VCPKG_ROOT.
-    let vcpkg_root = format!("{}/target/vcpkg", target_path.display());
+    // Invalidate build whenever configuration changes.
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=wrapper.hpp");
 
-    // Define the cmake configuration.
-    let config = cmake::Config::new("ale")
+    // Get OUT_DIR path.
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    // Get the target path.
+    let target_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    // Get the VCPKG_ROOT path.
+    let vcpkg_path = format!("{}/target/vcpkg", target_path.display());
+
+    // Build ALE using CMake.
+    let ale = cmake::Config::new("ale")
         // Set VCPKG_ROOT env variable.
-        .env("VCPKG_ROOT", &vcpkg_root)
+        .env("VCPKG_ROOT", &vcpkg_path)
         // Enable Linking Time Optimization (LTO).
         .define("ENABLE_LTO", "ON")
         // Set the build release type.
@@ -29,13 +35,22 @@ fn main() {
         // Build the library.
         .build();
 
-    // Link to the native library.
-    println!(
-        "cargo:rustc-link-search=native={}",
-        config.join("lib").display()
-    );
-    println!("cargo:rustc-link-lib=static=ale");
-    // Link to the C++ standard library.
+    // Build utils using CMake.
+    let utils = cmake::Config::new("utils")
+        // Enable Linking Time Optimization (LTO).
+        .define("ENABLE_LTO", "ON")
+        // Set the build release type.
+        .define("CMAKE_BUILD_TYPE", "Release")
+        // Build the library.
+        .build();
+
+    // Link ALE.
+    println!("cargo:rustc-link-search={}", ale.join("lib").display());
+    println!("cargo:rustc-link-lib=ale");
+    // Link utils.
+    println!("cargo:rustc-link-search={}", utils.join("lib").display());
+    println!("cargo:rustc-link-lib=utils");
+    // Link the C++ standard library.
     match OS {
         "apple" => println!("cargo:rustc-link-lib=dylib=c++"),
         "linux" => println!("cargo:rustc-link-lib=dylib=stdc++"),
@@ -44,7 +59,7 @@ fn main() {
     }
     // Link SDL2.
     vcpkg::Config::new()
-        .vcpkg_root(vcpkg_root.clone().into())
+        .vcpkg_root(vcpkg_path.clone().into())
         .find_package("sdl2")
         .expect("Unable to find SDL2")
         .cargo_metadata
@@ -52,9 +67,9 @@ fn main() {
         .for_each(|x| {
             println!("{}", x);
         });
-    // Link to ZLIB.
+    // Link ZLIB.
     vcpkg::Config::new()
-        .vcpkg_root(vcpkg_root.into())
+        .vcpkg_root(vcpkg_path.into())
         .find_package("zlib")
         .expect("Unable to find ZLIB")
         .cargo_metadata
@@ -62,14 +77,8 @@ fn main() {
         .for_each(|x| {
             println!("{}", x);
         });
-    // Invalidate the build crate whenever the configuration changes.
-    println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=wrapper.hpp");
 
-    // Get OUT_DIR path.
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-
-    // Define the bindings.
+    // Generate the bindings.
     let bindings = bindgen::Builder::default()
         // Set verbose.
         .clang_arg("-v")
