@@ -1,19 +1,23 @@
 extern crate bindgen;
 extern crate cmake;
 
-use std::{env, path::PathBuf};
+use std::{
+    env::{self, consts::OS},
+    path::PathBuf,
+};
+
+use vcpkg;
 
 fn main() {
     // Get the target dir.
     let target_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    // Get the VCPKG_ROOT.
+    let vcpkg_root = format!("{}/target/vcpkg", target_path.display());
 
     // Define the cmake configuration.
     let config = cmake::Config::new("ale")
         // Set VCPKG_ROOT env variable.
-        .env(
-            "VCPKG_ROOT",
-            format!("{}/target/vcpkg", target_path.display()),
-        )
+        .env("VCPKG_ROOT", &vcpkg_root)
         // Enable Linking Time Optimization (LTO).
         .define("ENABLE_LTO", "ON")
         // Set the build release type.
@@ -27,9 +31,37 @@ fn main() {
 
     // Link to the native library.
     println!(
-        "cargo:rustc-link-search=native={}/libale",
+        "cargo:rustc-link-search=native={}",
         config.join("lib").display()
     );
+    println!("cargo:rustc-link-lib=static=ale");
+    // Link to the C++ standard library.
+    match OS {
+        "apple" => println!("cargo:rustc-link-lib=dylib=c++"),
+        "linux" => println!("cargo:rustc-link-lib=dylib=stdc++"),
+        "windows" => println!("cargo:rustc-link-lib=dylib=stdc++"),
+        _ => unimplemented!(),
+    }
+    // Link SDL2.
+    vcpkg::Config::new()
+        .vcpkg_root(vcpkg_root.clone().into())
+        .find_package("sdl2")
+        .expect("Unable to find SDL2")
+        .cargo_metadata
+        .into_iter()
+        .for_each(|x| {
+            println!("{}", x);
+        });
+    // Link to ZLIB.
+    vcpkg::Config::new()
+        .vcpkg_root(vcpkg_root.into())
+        .find_package("zlib")
+        .expect("Unable to find ZLIB")
+        .cargo_metadata
+        .into_iter()
+        .for_each(|x| {
+            println!("{}", x);
+        });
     // Invalidate the build crate whenever the configuration changes.
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=wrapper.hpp");
@@ -67,6 +99,8 @@ fn main() {
         // Patch missing types.
         .module_raw_line("root::std", "pub type _Tp = usize;")
         .module_raw_line("root::__gnu_cxx", "pub type _Value = usize;")
+        // Map `size_t` as `usize`.
+        .size_t_is_usize(true)
         // Generate the bindings.
         .generate()
         // Unwrap the Result and panic on failure.
