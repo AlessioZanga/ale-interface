@@ -14,6 +14,8 @@ fn main() {
             "VCPKG_ROOT",
             format!("{}/target/vcpkg", target_path.display()),
         )
+        // Enable Linking Time Optimization (LTO).
+        .define("ENABLE_LTO", "ON")
         // Set the build release type.
         .define("CMAKE_BUILD_TYPE", "Release")
         // Disable Python lib.
@@ -41,21 +43,30 @@ fn main() {
         .clang_arg("-v")
         // Set the C++17 language.
         .clang_arg("-std=c++17")
-        // Include the library headers.
-        .clang_arg("-Iale/src/")
         // Include the library version header.
         .clang_arg(format!("-I{}/include/ale/", out_path.display()))
+        // Include the library headers.
+        .detect_include_paths(true)
         // Set the wrapper to generate the bindings for.
         .header("wrapper.hpp")
         // Invalidate the built crate whenever the wrapper changes.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        // Set enum style.
+        .default_enum_style(bindgen::EnumVariation::Rust {
+            non_exhaustive: true,
+        })
+        // Map C++ namespaces to Rust modules.
+        .enable_cxx_namespaces()
         // Handle opaque types.
-        .opaque_type("std::.*")
+        .opaque_type(".*")
         .blocklist_type("iterator")
         .blocklist_type("int_type")
         .blocklist_type("char_type")
         .blocklist_type("size_type")
         .blocklist_type("__hashtable")
+        // Patch missing types.
+        .module_raw_line("root::std", "pub type _Tp = usize;")
+        .module_raw_line("root::__gnu_cxx", "pub type _Value = usize;")
         // Generate the bindings.
         .generate()
         // Unwrap the Result and panic on failure.
@@ -66,15 +77,4 @@ fn main() {
     bindings
         .write_to_file(out_path)
         .expect("Unable to write bindings");
-
-    // FIXME: Read and patch the bindings.
-    let bindings = std::fs::read_to_string(out_path)
-        .expect("Unable to read bindings")
-        // Replace `_Tp` placeholder with `usize`.
-        .replace("_Tp", "usize")
-        // Replace `_Value` placeholder with `usize`.
-        .replace("_Value", "usize");
-
-    // Write the patched bindings.
-    std::fs::write(&out_path, bindings).expect("Unable to write bindings");
 }
