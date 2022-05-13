@@ -14,30 +14,6 @@ mod ale_interface {
     }
 
     #[test]
-    fn get_bool() {
-        // Initialize the ALEInterface.
-        let mut ale: ALEInterface = Default::default();
-    }
-
-    #[test]
-    fn get_int() {
-        // Initialize the ALEInterface.
-        let mut ale: ALEInterface = Default::default();
-    }
-
-    #[test]
-    fn get_float() {
-        // Initialize the ALEInterface.
-        let mut ale: ALEInterface = Default::default();
-    }
-
-    #[test]
-    fn get_string() {
-        // Initialize the ALEInterface.
-        let mut ale: ALEInterface = Default::default();
-    }
-
-    #[test]
     fn default() {
         ALEInterface::default();
     }

@@ -3,6 +3,8 @@
 
 //! Rust binding for the [Arcade-Learning-Environment](https://github.com/mgbellemare/Arcade-Learning-Environment).
 
+use std::path::Path;
+
 /// Include bindings.
 pub mod ffi {
     include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
@@ -38,12 +40,13 @@ pub mod utils {
     }
 }
 
+/// Rust binding of the ALEInterface class.
 pub struct ALEInterface {
     ffi: ffi::ale::ALEInterface,
 }
 
 impl ALEInterface {
-    /// Constructs an ALEInterface struct.
+    /// [alias: ALEInterface] Constructs an ALEInterface struct.
     pub fn new() -> Self {
         // Initialize the ALEInterface FFI.
         let ffi = unsafe { ffi::ale::ALEInterface::new() };
@@ -51,25 +54,53 @@ impl ALEInterface {
         Self { ffi }
     }
 
-    /// Constructs an ALEInterface struct with or without a display screen. Alias of `new1`.
+    /// [alias: ALEInterface] Constructs an ALEInterface struct with or without a display screen.
     pub fn with_display_screen(flag: bool) -> Self {
-        // Initialize the ALEInterface FFI.
+        // Initialize the ALEInterface FFI by setting the `display_screen` flag.
         let ffi = unsafe { ffi::ale::ALEInterface::new1(flag) };
 
         Self { ffi }
     }
 
-    // TODO: act
-    // TODO: cloneState
-    // TODO: cloneSystemState
+    /// [alias: act] Perform the given action and return the obtained reward.
+    // TODO: Check return type.
+    pub fn act(&mut self, action: ffi::ale::Action) -> u32 {
+        unsafe { self.ffi.act(action) }
+    }
+
+    /// [alias: cloneState] Clone the state of the ALEInterface.
+    // TODO: Check for unnecessary mutability on the C++ side.
+    pub fn clone_state(&mut self, with_rng: bool) -> ffi::ale::ALEState {
+        unsafe { self.ffi.cloneState(with_rng) }
+    }
+
+    /// [alias: cloneSystemState] Clone the state of the ALEInterface.
+    // TODO: Check for unnecessary mutability on the C++ side.
+    // TODO: Check for overloading of `clone_state`.
+    pub fn close_system_state(&mut self) -> ffi::ale::ALEState {
+        unsafe { self.ffi.cloneSystemState() }
+    }
+
     // TODO: createOSystem
+    pub fn create_os_system(&mut self) {
+        todo!()
+    }
+
     // TODO: createScreenExporter
+    pub fn create_screen_exporter(&mut self) {
+        todo!()
+    }
+
     // TODO: disableBufferedIO
+    pub fn disable_buffered_io(&mut self, path: &Path) -> &mut ffi::ale::ScreenExporter {
+        todo!()
+    }
+
     // TODO: game_over
     // TODO: getAvailableDifficulties
     // TODO: getAvailableModes
 
-    /// Gets boolean attribute given key.
+    /// [alias: getBool] Gets boolean attribute given key.
     // FIXME: Make self reference immutable.
     pub fn get_bool(&mut self, key: &str) -> bool {
         unsafe { self.ffi.getBool(&utils::into_std_string(key)) }
@@ -77,7 +108,7 @@ impl ALEInterface {
 
     // TODO: getEpisodeFrameNumber
 
-    /// Gets float attribute given key.
+    /// [alias: getFloat] Gets float attribute given key.
     // FIXME: Make self reference immutable.
     pub fn get_float(&mut self, key: &str) -> f32 {
         unsafe { self.ffi.getFloat(&utils::into_std_string(key)) }
@@ -85,7 +116,7 @@ impl ALEInterface {
 
     // TODO: getFrameNumber
 
-    /// Gets integer attribute given key.
+    /// [alias: getInt] Gets integer attribute given key.
     // FIXME: Make self reference immutable.
     pub fn get_int(&mut self, key: &str) -> i32 {
         unsafe { self.ffi.getInt(&utils::into_std_string(key)) }
@@ -98,7 +129,7 @@ impl ALEInterface {
     // TODO: getScreenGrayscale
     // TODO: getScreenRGB
 
-    /// Gets string attribute given key.
+    /// [alias: getString] Gets string attribute given key.
     // FIXME: Make self reference immutable.
     pub fn get_str(&mut self, key: &str) -> &str {
         unsafe { utils::from_std_string(self.ffi.getString(&utils::into_std_string(key))) }
@@ -124,7 +155,7 @@ impl ALEInterface {
 }
 
 impl Drop for ALEInterface {
-    // Alias of `destruct`.
+    // [alias: ~ALEInterface].
     fn drop(&mut self) {
         unsafe { self.ffi.destruct() }
     }
