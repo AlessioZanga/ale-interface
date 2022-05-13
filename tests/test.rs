@@ -17,11 +17,24 @@ mod ale_interface {
     fn get_bool() {
         // Initialize the ALEInterface.
         let mut ale: ALEInterface = Default::default();
+    }
 
-        // Test `display_screen` attribute.
-        assert_eq!(ale.get_bool("display_screen"), false);
-        // Test `sound` attribute.
-        assert_eq!(ale.get_bool("sound"), false);
+    #[test]
+    fn get_int() {
+        // Initialize the ALEInterface.
+        let mut ale: ALEInterface = Default::default();
+    }
+
+    #[test]
+    fn get_float() {
+        // Initialize the ALEInterface.
+        let mut ale: ALEInterface = Default::default();
+    }
+
+    #[test]
+    fn get_string() {
+        // Initialize the ALEInterface.
+        let mut ale: ALEInterface = Default::default();
     }
 
     #[test]
