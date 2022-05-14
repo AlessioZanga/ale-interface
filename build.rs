@@ -92,10 +92,12 @@ fn main() {
         .header("wrapper.hpp")
         // Invalidate the built crate whenever the wrapper changes.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        // Set enum style.
-        .default_enum_style(bindgen::EnumVariation::Rust { non_exhaustive: true })
+        // Disable `Copy` derive to avoid implicit copy.
+        .derive_copy(false)
         // Map `size_t` as `usize`.
         .size_t_is_usize(true)
+        // Set enum style.
+        .default_enum_style(bindgen::EnumVariation::Rust { non_exhaustive: true })
         // Map C++ namespaces to Rust modules.
         .enable_cxx_namespaces()
         // Fix wrong alignments.

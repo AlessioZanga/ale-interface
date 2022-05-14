@@ -2,6 +2,17 @@
 
 namespace utils {
 
+std::vector<uint32_t> std_vector_u32_from(const uint32_t* v, size_t n, size_t c) {    
+    // Initialize the vector.
+    std::vector<uint32_t> out;
+    // Reserve additional capacity.
+    out.reserve(c);
+    // Assign values.
+    out.assign(v, v + n);
+
+    return out;
+}
+
 uint32_t* std_vector_u32_buffer(std::vector<uint32_t>& v) { return v.data(); }
 
 size_t std_vector_u32_length(const std::vector<uint32_t>& v) { return v.size(); }

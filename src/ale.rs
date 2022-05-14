@@ -1,15 +1,8 @@
-use std::{collections::BTreeSet, mem::transmute, path::Path};
+use std::{collections::BTreeSet, mem::transmute};
 
+/// Re-export of FFI types.
+pub use crate::ffi::ale::{ALEScreen, ALEState, Action as ALEAction, ALERAM};
 use crate::{ffi, utils};
-
-/// ALEAction enumerator.
-pub type ALEAction = ffi::ale::Action;
-
-/// ALEScreenExporter.
-pub type ALEScreenExporter = ffi::ale::ScreenExporter;
-
-/// ALEState.
-pub type ALEState = ffi::ale::ALEState;
 
 /// Rust binding of the ALEInterface class.
 pub struct ALEInterface {
@@ -21,7 +14,7 @@ impl ALEInterface {
     pub fn new() -> Self {
         // Initialize the ALEInterface FFI.
         let ffi = unsafe { ffi::ale::ALEInterface::new() };
-        // Safe because is a constructor.
+        // Safe because it is a constructor.
         Self { ffi }
     }
 
@@ -29,7 +22,7 @@ impl ALEInterface {
     pub fn with_display_screen(flag: bool) -> Self {
         // Initialize the ALEInterface FFI by setting the `display_screen` flag.
         let ffi = unsafe { ffi::ale::ALEInterface::new1(flag) };
-        // Safe because is a constructor.
+        // Safe because it is a constructor.
         Self { ffi }
     }
 
@@ -63,13 +56,13 @@ impl ALEInterface {
     }
 
     // TODO: disableBufferedIO
-    pub fn disable_buffered_io(&mut self, path: &Path) -> &mut ALEScreenExporter {
+    pub fn disable_buffered_io(&mut self) {
         todo!()
     }
 
     /// [alias: game_over] Checks whether the game is over or not.
     pub fn is_game_over(&self) -> bool {
-        // Safe because is a getter.
+        // Safe because it is a read-only getter.
         unsafe { self.ffi.game_over() }
     }
 
@@ -97,14 +90,18 @@ impl ALEInterface {
         unsafe { self.ffi.getEpisodeFrameNumber() as usize }
     }
 
+    /// [alias: getFrameNumber] Gets the frame number since the loading of the ROM.
+    // TODO: Check for unnecessary mutability on the C++ side.
+    pub fn get_total_frames_count(&mut self) -> usize {
+        unsafe { self.ffi.getFrameNumber() as usize }
+    }
+
     /// [alias: getFloat] Gets float attribute given key.
     // TODO: Check for unnecessary mutability on the C++ side.
     // TODO: If `key` is not set, then it should returns None, instead of the default value.
     pub fn get_float(&mut self, key: &str) -> f32 {
         unsafe { self.ffi.getFloat(&utils::into_std_string(key)) }
     }
-
-    // TODO: getFrameNumber
 
     /// [alias: getInt] Gets integer attribute given key.
     // TODO: Check for unnecessary mutability on the C++ side.
@@ -139,8 +136,20 @@ impl ALEInterface {
         }
     }
 
-    // TODO: getRAM
-    // TODO: getScreen
+    /// [alias: getRAM] Gets the current RAM content.
+    // TODO: Check for unnecessary mutability on the C++ side.
+    pub fn get_ram(&mut self) -> &ALERAM {
+        // Safe because `getRAM` returns a reference.
+        unsafe { &*self.ffi.getRAM() }
+    }
+
+    /// [alias: getScreen] Gets the current game screen.
+    // TODO: Check for unnecessary mutability on the C++ side.
+    pub fn get_screen(&mut self) -> &ALEScreen {
+        // Safe because `getScreen` returns a reference.
+        unsafe { &*self.ffi.getScreen() }
+    }
+
     // TODO: getScreenGrayscale
     // TODO: getScreenRGB
 

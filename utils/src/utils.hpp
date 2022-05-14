@@ -6,6 +6,9 @@
 
 namespace utils {
 
+// Convert `uint32_t*` to `std::vector<uint32_t>`.
+std::vector<uint32_t> std_vector_u32_from(const uint32_t* v, size_t n, size_t c);
+
 // Convert `std::vector<uint32_t>` to `uint32_t*`.
 uint32_t* std_vector_u32_buffer(std::vector<uint32_t>& v);
 
