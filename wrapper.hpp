@@ -1,5 +1,3 @@
-// Include STD types.
-#include <string>
 // Include the ALE interface.
 #include "ale/src/ale_interface.hpp"
 // Include C++ utils for Rust FFI.

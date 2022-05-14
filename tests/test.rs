@@ -9,8 +9,8 @@ mod ale_interface {
     #[test]
     fn with_display_screen() {
         // Test with/without display screen.
-        ALEInterface::with_display_screen(true);
         ALEInterface::with_display_screen(false);
+        ALEInterface::with_display_screen(true);
     }
 
     #[test]

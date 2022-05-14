@@ -93,23 +93,28 @@ fn main() {
         // Invalidate the built crate whenever the wrapper changes.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         // Set enum style.
-        .default_enum_style(bindgen::EnumVariation::Rust {
-            non_exhaustive: true,
-        })
-        // Map C++ namespaces to Rust modules.
-        .enable_cxx_namespaces()
-        // Handle opaque types.
-        .opaque_type(".*")
-        .blocklist_type("iterator")
-        .blocklist_type("int_type")
-        .blocklist_type("char_type")
-        .blocklist_type("size_type")
-        .blocklist_type("__hashtable")
-        // Patch missing types.
-        .module_raw_line("root::std", "pub type _Tp = usize;")
-        .module_raw_line("root::__gnu_cxx", "pub type _Value = usize;")
+        .default_enum_style(bindgen::EnumVariation::Rust { non_exhaustive: true })
         // Map `size_t` as `usize`.
         .size_t_is_usize(true)
+        // Map C++ namespaces to Rust modules.
+        .enable_cxx_namespaces()
+        // Fix wrong alignments.
+        .layout_tests(false)
+        // Fix cyclical definitions.
+        .blocklist_type("iterator")
+        .blocklist_type("int_type")
+        .blocklist_type("size_type")
+        .blocklist_type("char_type")
+        .blocklist_type("__hashtable")
+        // Fix missing types.
+        .module_raw_line("root", "pub type size_type = usize;")
+        .module_raw_line("root::std", "pub type _CharT = ::std::os::raw::c_char;")
+        .module_raw_line("root::std", "pub type _Iterator = usize;")
+        .module_raw_line("root::std", "pub type _NodeHandle = usize;")
+        .module_raw_line("root::std", "pub type _RehashPolicy = usize;")
+        .module_raw_line("root::std", "pub type _Tp = usize;")
+        .module_raw_line("root::std", "pub type _Traits = usize;")
+        .module_raw_line("root::__gnu_cxx", "pub type _Value = usize;")
         // Generate the bindings.
         .generate()
         // Unwrap the Result and panic on failure.
@@ -117,7 +122,5 @@ fn main() {
 
     // Write the bindings to the $OUT_DIR/bindings.rs file.
     let out_path = &out_path.join("bindings.rs");
-    bindings
-        .write_to_file(out_path)
-        .expect("Unable to write bindings");
+    bindings.write_to_file(out_path).expect("Unable to write bindings");
 }

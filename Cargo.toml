@@ -17,6 +17,7 @@ categories = ["api-bindings", "science", "simulation"]
 [build-dependencies]
 bindgen = "^0.59"
 cmake = "^0.1"
+c_vec = "^2.0"
 vcpkg = "^0.2"
 
 [package.metadata.vcpkg]
