@@ -1,8 +1,8 @@
-use std::{mem::MaybeUninit, pin::Pin};
+use std::{collections::BTreeSet, mem::MaybeUninit, pin::Pin};
 
-use autocxx::prelude::New;
+use autocxx::prelude::*;
 
-use crate::ffi;
+use crate::{ffi, ffi::ale::reward_t as ALEReward, ALEAction};
 
 /// Rust FFI binding for the ALEInterface class.
 pub struct ALEInterface {
@@ -10,7 +10,7 @@ pub struct ALEInterface {
 }
 
 impl ALEInterface {
-    /// [alias: new] Constructor of the ALEInterface struct.
+    /// Constructor of the ALEInterface struct [alias: new].
     pub fn new() -> Self {
         unsafe {
             use ffi::ale::ALEInterface;
@@ -25,7 +25,7 @@ impl ALEInterface {
         }
     }
 
-    /// [alias: new1] Constructor of the ALEInterface struct with/without display screen.
+    /// Constructor of the ALEInterface struct with/without display screen [alias: new1].
     pub fn with_display_screen(flag: bool) -> Self {
         unsafe {
             use ffi::ale::ALEInterface;
@@ -40,7 +40,11 @@ impl ALEInterface {
         }
     }
 
-    // TODO: act
+    /// Applies an action to the game and returns the reward [alias: act].
+    pub fn act(&mut self, action: ALEAction) -> ALEReward {
+        unsafe { Pin::new_unchecked(&mut self.ffi).act(action) }
+    }
+
     // TODO: cloneState
     // TODO: cloneSystemState
     // TODO: createOSystem
@@ -55,8 +59,37 @@ impl ALEInterface {
     // TODO: getFloat
     // TODO: getFrameNumber
     // TODO: getInt
-    // TODO: getLegalActionSet
-    // TODO: getMinimalActionSet
+
+    /// Returns the vector of legal actions [alias: getLegalActionSet].
+    pub fn get_actions(&mut self) -> BTreeSet<ALEAction> {
+        unsafe {
+            // Get wrapper around the returned value.
+            let actions = Pin::new_unchecked(&mut self.ffi).getLegalActionSet();
+            // Map return value to associated type.
+            actions
+                .as_ref()
+                .expect("Invalid pointer")
+                .into_iter()
+                .cloned()
+                .collect()
+        }
+    }
+
+    /// Returns the vector of the minimal set of actions needed to play the game [alias: getMinimalActionSet].
+    pub fn get_minimal_actions(&mut self) -> BTreeSet<ALEAction> {
+        unsafe {
+            // Get wrapper around the returned value.
+            let actions = Pin::new_unchecked(&mut self.ffi).getLegalActionSet();
+            // Map return value to associated type.
+            actions
+                .as_ref()
+                .expect("Invalid pointer")
+                .into_iter()
+                .cloned()
+                .collect()
+        }
+    }
+
     // TODO: getMode
     // TODO: getRAM
     // TODO: getScreen

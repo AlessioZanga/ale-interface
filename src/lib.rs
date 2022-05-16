@@ -15,5 +15,8 @@ include_cpp! {
     generate!("ale::action_to_string")
 }
 
-mod ale_interface;
-pub use crate::ale_interface::*;
+mod action;
+pub use crate::action::ALEAction;
+
+mod interface;
+pub use crate::interface::ALEInterface;
