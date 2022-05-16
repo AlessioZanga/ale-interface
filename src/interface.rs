@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, mem::MaybeUninit, pin::Pin};
+use std::{collections::BTreeSet, mem::MaybeUninit, path::Path, pin::Pin};
 
 use autocxx::prelude::*;
 use cxx::let_cxx_string;
@@ -92,10 +92,12 @@ impl ALEInterface {
 
     /// Gets boolean attribute given key [alias: getBool].
     pub fn get_bool(&mut self, key: &str) -> bool {
-        // Map the key to the associated type.
-        let_cxx_string!(k = key);
+        unsafe {
+            // Map the key to the associated type.
+            let_cxx_string!(k = key);
 
-        unsafe { Pin::new_unchecked(&mut self.ffi).getBool(&k) }
+            Pin::new_unchecked(&mut self.ffi).getBool(&k)
+        }
     }
 
     /// Returns the current difficulty switch setting [alias: getDifficulty].
@@ -110,10 +112,12 @@ impl ALEInterface {
 
     /// Gets float attribute given key [alias: getFloat].
     pub fn get_float(&mut self, key: &str) -> f32 {
-        // Map the key to the associated type.
-        let_cxx_string!(k = key);
+        unsafe {
+            // Map the key to the associated type.
+            let_cxx_string!(k = key);
 
-        unsafe { Pin::new_unchecked(&mut self.ffi).getFloat(&k) }
+            Pin::new_unchecked(&mut self.ffi).getFloat(&k)
+        }
     }
 
     /// Returns the frame number since the loading of the ROM [alias: getFrameNumber].
@@ -123,10 +127,12 @@ impl ALEInterface {
 
     /// Gets integer attribute given key [alias: getInt].
     pub fn get_int(&mut self, key: &str) -> i32 {
-        // Map the key to the associated type.
-        let_cxx_string!(k = key);
+        unsafe {
+            // Map the key to the associated type.
+            let_cxx_string!(k = key);
 
-        unsafe { Pin::new_unchecked(&mut self.ffi).getInt(&k).into() }
+            Pin::new_unchecked(&mut self.ffi).getInt(&k).into()
+        }
     }
 
     /// Returns the vector of legal actions [alias: getLegalActionSet].
@@ -179,10 +185,10 @@ impl ALEInterface {
 
     /// Gets string attribute given key [alias: getString].
     pub fn get_string(&mut self, key: &str) -> String {
-        // Map the key to the associated type.
-        let_cxx_string!(k = key);
-
         unsafe {
+            // Map the key to the associated type.
+            let_cxx_string!(k = key);
+
             Pin::new_unchecked(&mut self.ffi)
                 .getString(&k)
                 .as_ref()
@@ -202,6 +208,21 @@ impl ALEInterface {
     }
 
     // FIXME: loadROM
+    pub fn load_rom(&mut self, path: &Path) {
+        unsafe {
+            // Map Path into String.
+            let path = path.to_string_lossy().into_owned();
+            // Map String into std::string.
+            let_cxx_string!(p = path);
+            // Get the std::filesystem::path constructor.
+            let path = ffi::utils::string_to_path(&p);
+            // Pass the constructor to the FFI call.
+            let path = as_new(path);
+            // Load ROM with the given path.
+            Pin::new_unchecked(&mut self.ffi).loadROM(path)
+        }
+    }
+
     // FIXME: loadSettings
 
     /// Resets the game, but not the full system [alias: reset_game].
@@ -221,18 +242,22 @@ impl ALEInterface {
 
     /// Save the current screen as a PNG file [alias: saveScreenPNG].
     pub fn save_screen_png(&mut self, filename: &str) {
-        // Map the key to the associated type.
-        let_cxx_string!(f = filename);
+        unsafe {
+            // Map the key to the associated type.
+            let_cxx_string!(f = filename);
 
-        unsafe { Pin::new_unchecked(&mut self.ffi).saveScreenPNG(&f) }
+            Pin::new_unchecked(&mut self.ffi).saveScreenPNG(&f)
+        }
     }
 
     /// Sets a boolean attribute given key [alias: setBool].
     pub fn set_bool(&mut self, key: &str, value: bool) {
-        // Map the key to the associated type.
-        let_cxx_string!(k = key);
+        unsafe {
+            // Map the key to the associated type.
+            let_cxx_string!(k = key);
 
-        unsafe { Pin::new_unchecked(&mut self.ffi).setBool(&k, value) }
+            Pin::new_unchecked(&mut self.ffi).setBool(&k, value)
+        }
     }
 
     /// Sets the difficulty of the game [alias: setDifficulty].
@@ -242,18 +267,22 @@ impl ALEInterface {
 
     /// Sets a float attribute given key [alias: setFloat].
     pub fn set_float(&mut self, key: &str, value: f32) {
-        // Map the key to the associated type.
-        let_cxx_string!(k = key);
+        unsafe {
+            // Map the key to the associated type.
+            let_cxx_string!(k = key);
 
-        unsafe { Pin::new_unchecked(&mut self.ffi).setFloat(&k, value) }
+            Pin::new_unchecked(&mut self.ffi).setFloat(&k, value)
+        }
     }
 
     /// Sets a integer attribute given key [alias: setInt].
     pub fn set_int(&mut self, key: &str, value: i32) {
-        // Map the key to the associated type.
-        let_cxx_string!(k = key);
+        unsafe {
+            // Map the key to the associated type.
+            let_cxx_string!(k = key);
 
-        unsafe { Pin::new_unchecked(&mut self.ffi).setInt(&k, value.into()) }
+            Pin::new_unchecked(&mut self.ffi).setInt(&k, value.into())
+        }
     }
 
     /// Sets the mode of the game [alias: setMode].
@@ -268,11 +297,13 @@ impl ALEInterface {
 
     /// Sets a string attribute given key [alias: setString].
     pub fn set_string(&mut self, key: &str, value: &str) {
-        // Map the key and the value to the associated types.
-        let_cxx_string!(k = key);
-        let_cxx_string!(v = value);
+        unsafe {
+            // Map the key and the value to the associated types.
+            let_cxx_string!(k = key);
+            let_cxx_string!(v = value);
 
-        unsafe { Pin::new_unchecked(&mut self.ffi).setString(&k, &v) }
+            Pin::new_unchecked(&mut self.ffi).setString(&k, &v)
+        }
     }
 
     /// Display ALE welcome message [alias: welcomeMessage].

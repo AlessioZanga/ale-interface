@@ -1,4 +1,6 @@
 mod interface {
+    use std::path::PathBuf;
+
     use ale_interface::ALEInterface;
 
     #[test]
@@ -19,5 +21,17 @@ mod interface {
     fn default() {
         // Test default constructor.
         ALEInterface::default();
+    }
+
+    #[test]
+    fn load_rom() {
+        // Set reference ROM path.
+        let path = PathBuf::from("ale/tests/resources/tetris.bin");
+        assert!(&path.exists());
+
+        // Initialize default environment.
+        let mut env: ALEInterface = Default::default();
+        // Load ROM given path.
+        env.load_rom(&path);
     }
 }

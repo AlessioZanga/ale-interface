@@ -30,21 +30,43 @@ fn main() {
         // Build the library.
         .build();
 
+    // Build utils using CMake.
+    let utils = cmake::Config::new("utils")
+        // Enable Linking Time Optimization (LTO).
+        .define("ENABLE_LTO", "ON")
+        // Set the build release type.
+        .define("CMAKE_BUILD_TYPE", "Release")
+        // Build the library.
+        .build();
+
     // Generate bindings using autocxx.
-    autocxx_build::Builder::new("src/lib.rs", [ale.join("include/ale")])
-        .extra_clang_args(&["-v", "-std=c++17"])
-        // Generate the bindings.
-        .build()
-        .expect("Unable to generate the bindings")
-        .flag_if_supported("-std=c++17")
-        // Compile and link the cxx bridge.
-        .compile("autocxx");
+    autocxx_build::Builder::new(
+        "src/lib.rs",
+        [
+            ale.join("include/ale"),
+            ale.join("include/ale/games"),
+            ale.join("include/ale/games/supported"),
+            utils.join("include/utils"),
+        ],
+    )
+    .extra_clang_args(&["-v", "-std=c++17"])
+    // Generate the bindings.
+    .build()
+    .expect("Unable to generate the bindings")
+    .flag_if_supported("-std=c++17")
+    // Compile and link the cxx bridge.
+    .compile("autocxx");
+
     // Link autocxx bindings.
     println!("cargo:rustc-link-search=native={}", ale.display());
     println!("cargo:rustc-link-lib=autocxx");
     // Link ALE.
     println!("cargo:rustc-link-search=native={}", ale.join("lib").display());
     println!("cargo:rustc-link-lib=ale");
+    // Link utils.
+    println!("cargo:rustc-link-search=native={}", utils.join("lib").display());
+    println!("cargo:rustc-link-lib=utils");
+
     // Link the C++ standard library.
     match OS {
         "apple" => println!("cargo:rustc-link-lib=dylib=c++"),
@@ -52,6 +74,7 @@ fn main() {
         "windows" => println!("cargo:rustc-link-lib=dylib=stdc++"),
         _ => unimplemented!(),
     }
+
     // Link SDL2.
     vcpkg::Config::new()
         .vcpkg_root(vcpkg_path.clone().into())
@@ -62,6 +85,7 @@ fn main() {
         .for_each(|x| {
             println!("{}", x);
         });
+
     // Link ZLIB.
     vcpkg::Config::new()
         .vcpkg_root(vcpkg_path.into())
