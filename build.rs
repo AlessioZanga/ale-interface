@@ -43,10 +43,7 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", ale.display());
     println!("cargo:rustc-link-lib=autocxx");
     // Link ALE.
-    println!(
-        "cargo:rustc-link-search=native={}",
-        ale.join("lib").display()
-    );
+    println!("cargo:rustc-link-search=native={}", ale.join("lib").display());
     println!("cargo:rustc-link-lib=ale");
     // Link the C++ standard library.
     match OS {
