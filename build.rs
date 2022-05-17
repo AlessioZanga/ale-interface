@@ -13,7 +13,9 @@ fn main() {
     // Get the target path.
     let target_path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     // Get the VCPKG_ROOT path.
-    let vcpkg_path = format!("{}/target/vcpkg", target_path.display());
+    let vcpkg_path = env::var("VCPKG_ROOT")
+        // If `VCPKG_ROOT` env variable is not set, then return cargo-vcpkg path.
+        .unwrap_or_else(|_| format!("{}/target/vcpkg", target_path.display()));
 
     // Build ALE using CMake.
     let ale = cmake::Config::new("ale")
@@ -23,10 +25,16 @@ fn main() {
         .define("ENABLE_LTO", "ON")
         // Set the build release type.
         .define("CMAKE_BUILD_TYPE", "Release")
-        // Disable Python lib.
+        // Disable Python support.
         .define("BUILD_PYTHON_LIB", "OFF")
-        // Enable SDL support.
-        .define("SDL_SUPPORT", "ON")
+        // Set SDL2 support.
+        .define(
+            "SDL_SUPPORT",
+            match cfg!(feature = "sdl2") {
+                false => "OFF",
+                true => "ON",
+            },
+        )
         // Build the library.
         .build();
 
@@ -75,20 +83,9 @@ fn main() {
         _ => unimplemented!(),
     }
 
-    // Link SDL2.
-    vcpkg::Config::new()
-        .vcpkg_root(vcpkg_path.clone().into())
-        .find_package("sdl2")
-        .expect("Unable to find SDL2")
-        .cargo_metadata
-        .into_iter()
-        .for_each(|x| {
-            println!("{}", x);
-        });
-
     // Link ZLIB.
     vcpkg::Config::new()
-        .vcpkg_root(vcpkg_path.into())
+        .vcpkg_root(vcpkg_path.clone().into())
         .find_package("zlib")
         .expect("Unable to find ZLIB")
         .cargo_metadata
@@ -96,4 +93,17 @@ fn main() {
         .for_each(|x| {
             println!("{}", x);
         });
+
+    // Link SDL2, if enabled.
+    if cfg!(feature = "sdl2") {
+        vcpkg::Config::new()
+            .vcpkg_root(vcpkg_path.clone().into())
+            .find_package("sdl2")
+            .expect("Unable to find SDL2")
+            .cargo_metadata
+            .into_iter()
+            .for_each(|x| {
+                println!("{}", x);
+            });
+    }
 }

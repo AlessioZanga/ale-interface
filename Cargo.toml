@@ -21,6 +21,9 @@ autocxx-build = "0.22.0"
 cmake = "^0.1"
 vcpkg = "^0.2"
 
+[features]
+sdl2 = []
+
 [package.metadata.vcpkg]
 git = "https://github.com/microsoft/vcpkg"
 rev = "2022.05.10"

@@ -27,6 +27,7 @@ mod interface {
     fn load_rom() {
         // Set reference ROM path.
         let path = PathBuf::from("ale/tests/resources/tetris.bin");
+
         assert!(&path.exists());
 
         // Initialize default environment.
