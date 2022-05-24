@@ -13,11 +13,11 @@ keywords = ["reinforcement-learning"]
 categories = ["api-bindings", "science", "simulation"]
 
 [dependencies]
-autocxx = "0.22.0"
-cxx = "1.0.54"
+autocxx = "^0.22"
+cxx = "^1.0"
 
 [build-dependencies]
-autocxx-build = "0.22.0"
+autocxx-build = "^0.22"
 cmake = "^0.1"
 vcpkg = "^0.2"
 
