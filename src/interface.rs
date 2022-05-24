@@ -207,7 +207,7 @@ impl ALEInterface {
         unsafe { Pin::new_unchecked(&mut self.ffi).lives().into() }
     }
 
-    // FIXME: loadROM
+    /// Load a ROM from a given path [alias: loadROM].
     pub fn load_rom(&mut self, path: &Path) {
         unsafe {
             // Map Path into String.
